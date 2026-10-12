@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>麦麦消消乐 · 麦当劳程序员节</title>
+<style>
+  :root{
+    --bg1:#FFD43B;     /* McDonald's yellow */
+    --bg2:#FF8C00;     /* orange */
+    --red:#DA291C;
+    --green:#00723F;
+    --ink:#2b1d00;
+    --paper:#fff7e1;
+    --shadow: 0 8px 0 rgba(0,0,0,.12), 0 16px 30px rgba(0,0,0,.18);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;font-family:"PingFang SC","Helvetica Neue",system-ui,-apple-system,"Microsoft YaHei",sans-serif;
+    background:radial-gradient(1200px 600px at 20% 0%, #FFE066 0%, transparent 60%),
+               radial-gradient(900px 500px at 100% 100%, #FF6B00 0%, transparent 55%),
+               linear-gradient(160deg,#FFD43B 0%, #FF8C00 100%);
+    color:var(--ink);min-height:100vh;overflow-x:hidden;}
+  .wrap{max-width:980px;margin:0 auto;padding:24px 16px 60px;}
+  header{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
+  .logo{width:54px;height:54px;border-radius:50%;background:var(--red);
+    box-shadow:inset 0 -8px 0 rgba(0,0,0,.18), 0 4px 12px rgba(0,0,0,.2);
+    position:relative;flex:0 0 auto;}
+  .logo::before{content:"M";color:#fff;font-weight:900;font-size:34px;line-height:54px;text-align:center;
+    display:block;font-family:"Times New Roman",serif;letter-spacing:-2px;}
+  .logo::after{content:"";position:absolute;inset:-6px;border:3px dashed #fff;border-radius:50%;
+    animation:spin 14s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  h1{margin:0;font-size:24px;letter-spacing:1px;}
+  .sub{font-size:13px;opacity:.75;}
+  .card{background:var(--paper);border-radius:18px;padding:18px;box-shadow:var(--shadow);}
+
+  /* Menu */
+  .menu-hero{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;}
+  .menu-hero .card{display:flex;flex-direction:column;justify-content:space-between;min-height:200px;}
+  .hero-title{font-size:28px;font-weight:900;line-height:1.15;color:var(--red);margin:0 0 6px;}
+  .hero-desc{font-size:14px;line-height:1.55;margin:0 0 12px;}
+  .badge{display:inline-block;background:var(--red);color:#fff;font-size:12px;padding:3px 10px;border-radius:999px;
+    letter-spacing:1px;margin-bottom:8px;}
+  .cta{display:inline-flex;align-items:center;gap:8px;background:var(--red);color:#fff;border:none;cursor:pointer;
+    padding:12px 18px;border-radius:999px;font-weight:800;letter-spacing:1px;box-shadow:0 4px 0 #8b1a12;font-size:15px;}
+  .cta:active{transform:translateY(2px);box-shadow:0 2px 0 #8b1a12;}
+  .cta:disabled{opacity:.6;cursor:wait;}
+  .hero-emoji{font-size:80px;line-height:1;text-align:center;}
+  .levels-title{margin:18px 4px 10px;font-size:18px;display:flex;align-items:center;gap:8px;}
+  .levels-title::before{content:"";width:6px;height:18px;background:var(--red);border-radius:3px;}
+  .chapter{margin-bottom:16px;}
+  .chapter-head{display:flex;justify-content:space-between;align-items:baseline;margin:0 4px 8px;
+    padding-bottom:6px;border-bottom:2px dashed rgba(0,0,0,.15);}
+  .chapter-name{font-weight:900;font-size:16px;color:var(--red);}
+  .chapter-meta{font-size:12px;opacity:.75;font-weight:700;}
+  .levels{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .lvl{background:var(--paper);border-radius:14px;padding:12px;cursor:pointer;box-shadow:var(--shadow);
+    transition:transform .15s ease;position:relative;border:2px solid transparent;}
+  .lvl:active{transform:scale(.97);}
+  .lvl.locked{opacity:.55;cursor:not-allowed;}
+  .lvl.completed{border-color:var(--green);}
+  .lvl .lvl-num{font-size:11px;letter-spacing:2px;color:var(--red);font-weight:800;}
+  .lvl .lvl-name{font-weight:800;font-size:14px;margin-top:2px;}
+  .lvl .lvl-info{font-size:11px;opacity:.7;margin-top:2px;}
+  .lvl .lvl-tag{position:absolute;top:8px;right:8px;font-size:14px;}
+  .lvl .reward{font-size:11px;color:var(--green);font-weight:700;margin-top:6px;}
+  .lvl .stars{font-size:11px;letter-spacing:2px;margin-top:2px;}
+
+  /* Game */
+  .game{display:none;}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;flex-wrap:wrap;}
+  .stat{display:flex;align-items:center;gap:6px;background:var(--paper);padding:8px 12px;border-radius:12px;
+    font-weight:800;box-shadow:0 4px 0 rgba(0,0,0,.1);font-size:14px;}
+  .stat span{color:var(--red);}
+  .btn-back{background:#fff;border:none;padding:8px 12px;border-radius:12px;cursor:pointer;
+    font-weight:800;box-shadow:0 4px 0 rgba(0,0,0,.1);font-size:13px;}
+  .progress{height:10px;background:#fff3;border-radius:6px;overflow:hidden;margin-bottom:10px;}
+  .progress > i{display:block;height:100%;background:linear-gradient(90deg,#FFC72C,#DA291C);transition:width .3s ease;}
+
+  .board{position:relative;background:#fff;border-radius:14px;padding:8px;box-shadow:var(--shadow);
+    margin:0 auto;max-width:520px;}
+  .grid{display:grid;gap:4px;touch-action:none;user-select:none;}
+  .cell{aspect-ratio:1/1;border-radius:8px;background:#FFF4D6;display:flex;align-items:center;justify-content:center;
+    font-size:32px;cursor:pointer;position:relative;transition:transform .12s ease, background .15s ease;
+    box-shadow:inset 0 -3px 0 rgba(0,0,0,.06);}
+  .cell.ice{background:linear-gradient(145deg,#DFF3FF,#A8DCF5);cursor:not-allowed;
+    box-shadow:inset 0 -3px 0 rgba(0,0,0,.12), inset 0 0 0 2px rgba(255,255,255,.65);}
+  .cell.ice.l2{background:linear-gradient(145deg,#BFE3F8,#7FC8E8);}
+  .cell.ice.l2::after{content:"×2";position:absolute;right:3px;bottom:1px;font-size:10px;font-weight:900;color:#0b5d7a;}
+  .cell.falling{animation:fall .35s ease;}
+  @keyframes fall{from{transform:translateY(-30px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  .cell.matched{animation:pop .35s ease forwards;}
+  @keyframes pop{
+    0%{transform:scale(1);}
+    40%{transform:scale(1.25);background:#ffe680;}
+    100%{transform:scale(0);opacity:0;}
+  }
+  .cell.swap{animation:shake .25s ease;}
+  @keyframes shake{25%{transform:translateX(-3px);}75%{transform:translateX(3px);}}
+  .cell.hint{outline:3px solid #FFD700;animation:pulse 1s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+  .combo{position:absolute;left:50%;top:30%;transform:translateX(-50%);
+    font-size:32px;font-weight:900;color:var(--red);text-shadow:0 2px 0 #fff;pointer-events:none;
+    animation:combo .8s ease forwards;}
+  @keyframes combo{0%{opacity:0;transform:translate(-50%,10px) scale(.6);}
+    30%{opacity:1;transform:translate(-50%,-10px) scale(1.1);}
+    100%{opacity:0;transform:translate(-50%,-40px) scale(1.4);}}
+
+  /* Modal */
+  .mask{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:50;
+    padding:16px;}
+  .mask.show{display:flex;animation:fadein .2s ease;}
+  @keyframes fadein{from{opacity:0;}to{opacity:1;}}
+  .modal{background:var(--paper);border-radius:18px;padding:22px;max-width:420px;width:100%;
+    box-shadow:var(--shadow);text-align:center;max-height:88vh;overflow-y:auto;}
+  .modal h2{margin:0 0 8px;color:var(--red);}
+  .modal p{margin:6px 0;font-size:14px;line-height:1.55;}
+  .stars{font-size:26px;letter-spacing:4px;margin:4px 0;}
+  .coupon{background:#fff;border:2px dashed var(--red);border-radius:12px;padding:12px;margin:10px 0;
+    font-family:"Courier New",monospace;font-weight:800;letter-spacing:1px;color:var(--red);font-size:15px;
+    word-break:break-all;position:relative;text-align:left;}
+  .coupon .small{display:block;font-weight:500;font-size:11px;color:#555;letter-spacing:0;
+    font-family:"PingFang SC",sans-serif;margin-top:4px;}
+  .coupon.tier-common{border-color:#8a8a8a;color:#5a5a5a;}
+  .coupon.tier-uncommon{border-color:var(--green);color:var(--green);}
+  .coupon.tier-epic{border-color:#7b2ff7;color:#7b2ff7;}
+  .coupon.tier-legend{border-color:#e6a700;color:#b8860b;background:linear-gradient(180deg,#fff,#fff6dc);}
+  .coupon.tier-limited{border-color:var(--red);color:var(--red);
+    background:linear-gradient(120deg,#fff 0%,#ffe9c7 50%,#fff 100%);}
+  .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
+  .actions .cta{box-shadow:0 4px 0 #8b1a12;}
+  .actions .ghost{background:#fff;color:var(--red);border:2px solid var(--red);box-shadow:0 4px 0 rgba(0,0,0,.1);}
+  .slot{font-size:56px;line-height:1.2;margin:12px 0;min-height:64px;display:flex;align-items:center;justify-content:center;}
+  .streak{display:inline-block;background:#fff;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:800;
+    color:var(--red);box-shadow:0 2px 0 rgba(0,0,0,.1);margin:2px;}
+  .odds-note{font-size:11px;opacity:.6;margin-top:8px;}
+
+  footer{margin-top:20px;text-align:center;font-size:11px;color:#6b4a00;opacity:.85;}
+  .toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:rgba(0,0,0,.78);color:#fff;
+    padding:10px 16px;border-radius:999px;font-size:13px;z-index:80;opacity:0;transition:opacity .2s ease;pointer-events:none;}
+  .toast.show{opacity:1;}
+
+  @media (max-width:640px){
+    .menu-hero{grid-template-columns:1fr;}
+    .levels{grid-template-columns:repeat(2,1fr);}
+    .cell{font-size:24px;}
+    .hero-title{font-size:22px;}
+    h1{font-size:20px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo" aria-hidden="true"></div>
+    <div>
+      <h1>麦麦消消乐 · McMatch</h1>
+      <div class="sub">基于麦当劳中国 MCP 的互动小游戏｜麦当劳程序员节专项</div>
+    </div>
+  </header>
+
+  <!-- 菜单 -->
+  <section id="menu">
+    <div class="menu-hero">
+      <div class="card">
+        <span class="badge">McDonald's × WorkBuddy</span>
+        <h2 class="hero-title">连一连，吃麦麦 🎉</h2>
+        <p class="hero-desc">把🍔🍟🥤🥗🍦🧀🍗连成三个以上就能消除！<br>
+          <b>12 关 · 3 大章节</b>，通关解锁阶梯优惠券，还有概率掉落 <b>🎁 麦乐惊喜盒</b>。</p>
+        <p class="hero-desc" style="font-size:12px;opacity:.75;">
+          🔥 连胜有额外奖励 · 🧊 LV4 起冰块阻碍（LV12 双倍厚冰）· 每日登录首通掉率翻倍
+        </p>
+        <button class="cta" onclick="Game.start(1)">▶ 开始游戏</button>
+      </div>
+      <div class="card" style="align-items:center;justify-content:center;">
+        <div class="hero-emoji">🍔🍟🥤</div>
+        <div style="font-size:13px;opacity:.7;text-align:center;margin-top:8px;">每局 1–2 分钟 · 适合碎片时间</div>
+      </div>
+    </div>
+
+    <div class="levels-title">关卡地图</div>
+    <div id="levels"></div>
+  </section>
+
+  <!-- 游戏 -->
+  <section id="game" class="game">
+    <div class="topbar">
+      <button class="btn-back" onclick="Game.exit()">← 返回</button>
+      <div class="stat">LV <span id="lvlNum">1</span></div>
+      <div class="stat">🍔 <span id="score">0</span>/<span id="target">0</span></div>
+      <div class="stat">👣 步数 <span id="moves">0</span></div>
+      <div class="stat" id="iceStat" style="display:none">🧊 冰块 <span id="ice">0</span></div>
+    </div>
+    <div class="progress"><i id="bar" style="width:0%"></i></div>
+    <div class="board"><div id="grid" class="grid"></div></div>
+  </section>
+
+  <footer>© 2026 麦麦消消乐 · 仅供麦当劳程序员创意开发大赛展示与互动使用 · 兑换请以门店实际活动为准 · 惊喜盒概率以页面公示为准</footer>
+</div>
+
+<!-- 弹窗 -->
+<div class="mask" id="mask">
+  <div class="modal" id="modal"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== 章节 ===== */
+const CHAPTERS = [
+  {id:1, name:"第一章 · 麦满分早晨", desc:"成长期 · 心流入门"},
+  {id:2, name:"第二章 · 麦乐鸡正午", desc:"挑战期 · 心流维持"},
+  {id:3, name:"第三章 · 麦麦省之夜", desc:"硬核期 · 心流挑战"},
+];
+
+/* ===== 数据：12 关 / 3 章（v3 难度上调版）===== */
+const LEVELS = [
+  {num:1,  ch:1, name:"麦香初醒", grid:6, moves:18, target:700,  types:6,  ice:0,  layers:1,
+   reward:{title:"满 15 元减 2 元券", cond:"满15可用 · 不可叠加 · 有效期3天", code:"MCMD15-2-XXXX"}},
+  {num:2,  ch:1, name:"蛋堡飘香", grid:6, moves:20, target:1000, types:6,  ice:0,  layers:1,
+   reward:{title:"满 15 元减 2 元券", cond:"满15可用 · 不可叠加 · 有效期3天", code:"MCMD15-2-XXXX"}},
+  {num:3,  ch:1, name:"脆薯节拍", grid:7, moves:20, target:1400, types:7,  ice:2,  layers:1,
+   reward:{title:"满 15 元减 2 元券", cond:"满15可用 · 不可叠加 · 有效期3天", code:"MCMD15-2-XXXX"}},
+  {num:4,  ch:1, name:"早晨高峰", grid:7, moves:22, target:1900, types:7,  ice:4,  layers:1, chest:1,
+   reward:{title:"满 15 元减 2 元券", cond:"满15可用 · 不可叠加 · 有效期3天", code:"MCMD15-2-XXXX"}},
+
+  {num:5,  ch:2, name:"鸡块交响", grid:8, moves:22, target:2400, types:8,  ice:6,  layers:1,
+   reward:{title:"麦乐鸡 5 块 9.5 折券", cond:"限麦乐鸡5块 · 9.5折封顶 · 有效期3天", code:"MCDCJ5-XXXX"}},
+  {num:6,  ch:2, name:"酱料狂想", grid:8, moves:18, target:3000, types:8,  ice:8,  layers:1,
+   reward:{title:"巨无霸单品 8 折券", cond:"限巨无霸单品 · 8折封顶 · 有效期3天", code:"MCDBMB-8-XXXX"}},
+  {num:7,  ch:2, name:"午市冲刺", grid:8, moves:20, target:3400, types:9,  ice:10, layers:1,
+   reward:{title:"麦乐鸡 5 块 9.5 折券", cond:"限麦乐鸡5块 · 9.5折封顶 · 有效期3天", code:"MCDCJ5-XXXX"}},
+  {num:8,  ch:2, name:"正午峰值", grid:9, moves:20, target:4000, types:9,  ice:12, layers:1, chest:1,
+   reward:{title:"巨无霸单品 8 折券", cond:"限巨无霸单品 · 8折封顶 · 有效期3天", code:"MCDBMB-8-XXXX"}},
+
+  {num:9,  ch:3, name:"夜色厨房", grid:9, moves:22, target:4600, types:10, ice:14, layers:1,
+   reward:{title:"满 20 元减 3 元券", cond:"满20可用 · 不可叠加 · 有效期3天", code:"MCMD20-3-XXXX"}},
+  {num:10, ch:3, name:"派对前奏", grid:9, moves:20, target:5200, types:10, ice:16, layers:1,
+   reward:{title:"麦辣鸡腿堡 9 折券", cond:"限麦辣鸡腿堡 · 9折封顶 · 有效期3天", code:"MCDBLC-9-XXXX"}},
+  {num:11, ch:3, name:"狂欢之夜", grid:9, moves:22, target:5800, types:10, ice:18, layers:1,
+   reward:{title:"满 20 元减 3 元券", cond:"满20可用 · 不可叠加 · 有效期3天", code:"MCMD20-3-XXXX"}},
+  {num:12, ch:3, name:"麦麦省之王", grid:9, moves:24, target:6800, types:10, ice:10, layers:2, chest:1, boss:1,
+   reward:{title:"满 30 元减 5 元券", cond:"满30可用 · 活动封顶 · 有效期3天", code:"MCDDEV-5-XXXX"}},
+];
+
+const FOODS = ["🍔","🍟","🍗","🥤","🥗","🍦","🧀","🥪","🌭","🥧"]; // 10 种
+
+/* ===== 惊喜盒奖池（可变比率奖励）===== */
+const BOX_POOL = [
+  {tier:"普通", tierKey:"common",   w:50, title:"满 15 元减 2 元券",      cond:"满15可用 · 有效期3天", code:"MCMD15-2-XXXX"},
+  {tier:"精良", tierKey:"uncommon", w:25, title:"麦乐鸡 5 块 9.5 折券",  cond:"限麦乐鸡5块 · 有效期3天", code:"MCDCJ5-XXXX"},
+  {tier:"史诗", tierKey:"epic",     w:15, title:"巨无霸单品 8 折券",     cond:"限巨无霸单品 · 8折封顶", code:"MCDBMB-8-XXXX"},
+  {tier:"传说", tierKey:"legend",   w:7,  title:"满 30 元减 5 元券",     cond:"满30可用 · 有效期3天", code:"MCDDEV-5-XXXX"},
+  {tier:"限定", tierKey:"limited",  w:3,  title:"程序员节限定周边抽奖资格", cond:"待官方活动配置 · 有效期7天", code:"MCDLTD-XXXX"},
+];
+
+const BOX_DROP_NORMAL = 0.45;  // 常规通关掉率
+const BOX_DROP_DAILY  = 0.70;  // 每日首通掉率（回访激励）
+const STREAK_BONUS = {3:1, 5:2, 8:3}; // 连胜额外盒数
+const REVIVE_MIN_PCT = 0.6;    // 续命触发线（近失效应）
+
+/* ===== 状态 ===== */
+const state = {
+  cur:null, pool:[], board:[], ice:new Map(), // "r,c" -> 剩余层数
+  score:0, moves:0, busy:false, selected:null,
+  unlocked:1, completed:new Set(), stars:{},
+  meta:{streak:0, bestStreak:0, lastDate:null, reviveUsedDate:null},
+};
+
+/* ===== 持久化 ===== */
+const SAVE_KEY = "mcdmatch.save.v1";
+function loadSave(){
+  try{
+    const s = JSON.parse(localStorage.getItem(SAVE_KEY)||"{}");
+    state.unlocked = s.unlocked||1;
+    state.completed = new Set(s.completed||[]);
+    state.stars = s.stars||{};
+    state.meta = Object.assign(state.meta, s.meta||{});
+  }catch(e){}
+}
+function saveSave(){
+  localStorage.setItem(SAVE_KEY, JSON.stringify({
+    unlocked: state.unlocked,
+    completed: [...state.completed],
+    stars: state.stars,
+    meta: state.meta,
+  }));
+}
+function today(){ return new Date().toISOString().slice(0,10); }
+
+/* ===== UI: 关卡地图（按章节分组）===== */
+function renderLevels(){
+  const host = document.getElementById("levels");
+  host.innerHTML = "";
+  CHAPTERS.forEach(ch=>{
+    const box = document.createElement("div");
+    box.className = "chapter";
+    const lvls = LEVELS.filter(l=>l.ch===ch.id);
+    const starsGot = lvls.reduce((s,l)=>s+(state.stars[l.num]||0),0);
+    const starsMax = lvls.length*3;
+    box.innerHTML = `
+      <div class="chapter-head">
+        <span class="chapter-name">${ch.name}</span>
+        <span class="chapter-meta">⭐ ${starsGot}/${starsMax} · ${ch.desc}</span>
+      </div>
+      <div class="levels"></div>
+    `;
+    const grid = box.querySelector(".levels");
+    lvls.forEach(lv=>{
+      const idx = LEVELS.indexOf(lv)+1;
+      const locked = idx > state.unlocked;
+      const done = state.completed.has(lv.num);
+      const st = state.stars[lv.num]||0;
+      const div = document.createElement("div");
+      div.className = "lvl" + (locked?" locked":"") + (done?" completed":"");
+      div.innerHTML = `
+        <div class="lvl-tag">${done?"✅":(locked?"🔒":(lv.boss?"👑":"🍔"))}</div>
+        <div class="lvl-num">LV. ${String(lv.num).padStart(2,"0")}</div>
+        <div class="lvl-name">${lv.name}</div>
+        <div class="lvl-info">${lv.grid}×${lv.grid} · ${lv.moves}步 · 目标${lv.target}${lv.ice?` · 🧊${lv.ice}${lv.layers>1?"×"+lv.layers:""}`:""}</div>
+        ${done?`<div class="stars">${"⭐".repeat(st)}${"☆".repeat(3-st)}</div>`:""}
+        <div class="reward">🏆 ${lv.reward.title}</div>
+      `;
+      if(!locked){ div.onclick = ()=> Game.start(lv.num); }
+      else{ div.onclick = ()=> toast("通关前一关解锁"); }
+      grid.appendChild(div);
+    });
+    host.appendChild(box);
+  });
+}
+
+/* ===== 弹窗 / Toast ===== */
+const mask = document.getElementById("mask");
+const modal = document.getElementById("modal");
+function showModal(html){ modal.innerHTML = html; mask.classList.add("show"); }
+function closeModal(){ mask.classList.remove("show"); }
+mask.addEventListener("click", e=>{ if(e.target===mask) closeModal(); });
+
+let toastTimer=null;
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove("show"), 1800);
+}
+
+/* ===== 工具 ===== */
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function rollFromPool(pool){
+  const total = pool.reduce((s,x)=>s+x.w,0);
+  let r = Math.random()*total;
+  for(const item of pool){ r -= item.w; if(r<=0) return item; }
+  return pool[pool.length-1];
+}
+function iceLayersLeft(){
+  let s=0; for(const v of state.ice.values()) s+=v; return s;
+}
+
+/* ===== 游戏对象 ===== */
+const Game = {
+  init(){ loadSave(); renderLevels(); },
+  start(num){
+    state.cur = LEVELS.find(l=>l.num===num);
+    if(!state.cur) return;
+    if(num > state.unlocked){ toast("该关卡尚未解锁"); return; }
+    state.score=0; state.moves=state.cur.moves; state.busy=false; state.selected=null;
+    state.pool = FOODS.slice(0, state.cur.types);
+    document.getElementById("menu").style.display="none";
+    document.getElementById("game").style.display="block";
+    document.getElementById("lvlNum").textContent = state.cur.num;
+    document.getElementById("target").textContent = state.cur.target;
+    this.buildBoard();
+    this.refreshHUD();
+    this.resetHint();
+  },
+  exit(){
+    clearTimeout(this._hintT);
+    document.querySelectorAll(".cell.hint").forEach(e=>e.classList.remove("hint"));
+    document.getElementById("menu").style.display="block";
+    document.getElementById("game").style.display="none";
+    renderLevels();
+  },
+  buildBoard(){
+    const n = state.cur.grid;
+    state.ice = new Map();
+    let placed=0, guard=0;
+    while(placed < state.cur.ice && guard++ < 800){
+      const r=Math.floor(Math.random()*n), c=Math.floor(Math.random()*n), k=r+","+c;
+      if(!state.ice.has(k)){ state.ice.set(k, state.cur.layers); placed++; }
+    }
+    do{
+      state.board = [];
+      for(let r=0;r<n;r++){
+        const row=[];
+        for(let c=0;c<n;c++) row.push(state.ice.has(r+","+c) ? null : this.randFood(r,c));
+        state.board.push(row);
+      }
+    }while(this.findMatches().length>0);
+    this.draw();
+  },
+  randFood(r,c){
+    const forbidden = new Set();
+    if(c>=2 && state.board[r] && state.board[r][c-1] && state.board[r][c-1]===state.board[r][c-2]) forbidden.add(state.board[r][c-1]);
+    if(r>=2 && state.board[r-1] && state.board[r-1][c] && state.board[r-1][c]===state.board[r-2][c]) forbidden.add(state.board[r-1][c]);
+    let f;
+    do{ f = state.pool[Math.floor(Math.random()*state.pool.length)]; }while(forbidden.has(f));
+    return f;
+  },
+  draw(){
+    const n = state.cur.grid;
+    const grid = document.getElementById("grid");
+    grid.style.gridTemplateColumns = `repeat(${n},1fr)`;
+    grid.innerHTML = "";
+    for(let r=0;r<n;r++){
+      for(let c=0;c<n;c++){
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.dataset.r=r; cell.dataset.c=c;
+        const layers = state.ice.get(r+","+c);
+        if(layers){
+          cell.classList.add("ice");
+          if(layers>1) cell.classList.add("l2");
+          cell.textContent = "🧊";
+        }else{
+          cell.textContent = state.board[r][c] || "";
+          cell.addEventListener("click", ()=> this.onCell(r,c));
+        }
+        grid.appendChild(cell);
+      }
+    }
+  },
+  cellAt(r,c){ return document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`); },
+  refreshHUD(){
+    document.getElementById("score").textContent = state.score;
+    document.getElementById("moves").textContent = state.moves;
+    const pct = Math.min(100, Math.round(state.score / state.cur.target * 100));
+    document.getElementById("bar").style.width = pct + "%";
+    const iceStat = document.getElementById("iceStat");
+    if(state.cur.ice>0){ iceStat.style.display="flex"; document.getElementById("ice").textContent = iceLayersLeft(); }
+    else iceStat.style.display="none";
+  },
+  onCell(r,c){
+    if(state.busy) return;
+    if(state.moves<=0) return;
+    this.resetHint();
+    if(!state.selected){
+      state.selected={r,c};
+      this.cellAt(r,c).style.outline="3px solid #DA291C";
+      return;
+    }
+    const {r:r1,c:c1} = state.selected;
+    this.cellAt(r1,c1).style.outline="";
+    if(r1===r && c1===c){ state.selected=null; return; }
+    if(Math.abs(r1-r)+Math.abs(c1-c)!==1){ state.selected={r,c}; this.cellAt(r,c).style.outline="3px solid #DA291C"; return; }
+    this.trySwap(r1,c1,r,c);
+    state.selected=null;
+  },
+  async trySwap(r1,c1,r2,c2){
+    if(state.ice.has(r1+","+c1) || state.ice.has(r2+","+c2)) return;
+    state.busy=true;
+    this.swap(r1,c1,r2,c2);
+    const matches = this.findMatches();
+    if(matches.length===0){
+      await sleep(180);
+      this.swap(r1,c1,r2,c2);
+      const a=this.cellAt(r1,c1), b=this.cellAt(r2,c2);
+      a.classList.add("swap"); b.classList.add("swap");
+      setTimeout(()=>{a.classList.remove("swap"); b.classList.remove("swap");},260);
+      state.busy=false;
+      this.resetHint();
+      return;
+    }
+    state.moves -= 1;
+    await this.resolveBoard();
+    state.busy=false;
+    this.checkEnd();
+  },
+  swap(r1,c1,r2,c2){
+    const t=state.board[r1][c1]; state.board[r1][c1]=state.board[r2][c2]; state.board[r2][c2]=t;
+    const a=this.cellAt(r1,c1), b=this.cellAt(r2,c2);
+    if(a){ a.textContent = state.board[r1][c1]; }
+    if(b){ b.textContent = state.board[r2][c2]; }
+  },
+  findMatches(){
+    const n = state.cur.grid;
+    const matched = Array.from({length:n},()=>Array(n).fill(false));
+    for(let r=0;r<n;r++){
+      let run=1;
+      for(let c=1;c<=n;c++){
+        if(c<n && state.board[r][c] && state.board[r][c-1] && state.board[r][c]===state.board[r][c-1]){ run++; continue; }
+        if(run>=3){ for(let k=c-run;k<c;k++) matched[r][k]=true; }
+        run=1;
+      }
+    }
+    for(let c=0;c<n;c++){
+      let run=1;
+      for(let r=1;r<=n;r++){
+        if(r<n && state.board[r][c] && state.board[r-1][c] && state.board[r][c]===state.board[r-1][c]){ run++; continue; }
+        if(run>=3){ for(let k=r-run;k<r;k++) matched[k][c]=true; }
+        run=1;
+      }
+    }
+    const cells=[];
+    for(let r=0;r<n;r++) for(let c=0;c<n;c++) if(matched[r][c]) cells.push([r,c]);
+    return cells;
+  },
+  async resolveBoard(){
+    let combo=0;
+    while(true){
+      const matches = this.findMatches();
+      if(matches.length===0) break;
+      combo++;
+      matches.forEach(([r,c])=>{
+        state.board[r][c] = null;   // 数据层同步清除，否则 dropCells/refill 空转导致无限级联
+        const cell=this.cellAt(r,c);
+        if(cell){ cell.classList.add("matched"); cell.textContent=""; }
+      });
+      // 冰块受击：层数 -1，归零才碎裂
+      const iceBreak=[];
+      matches.forEach(([r,c])=>{
+        [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dr,dc])=>{
+          const r2=r+dr, c2=c+dc, k=r2+","+c2;
+          if(state.ice.has(k)){
+            const left = state.ice.get(k)-1;
+            if(left<=0){ state.ice.delete(k); iceBreak.push([r2,c2]); }
+            else state.ice.set(k, left);
+          }
+        });
+      });
+      iceBreak.forEach(([r,c])=>{
+        const cell=this.cellAt(r,c);
+        if(cell){ cell.classList.add("matched"); }
+      });
+      const gain = matches.length * 10 * combo;
+      state.score += gain;
+      if(combo>1) this.showCombo(combo, gain);
+      this.refreshHUD();
+      await sleep(360);
+      this.dropCells();
+      this.refill();
+      this.draw();
+      await sleep(180);
+    }
+  },
+  showCombo(n, gain){
+    const board=document.querySelector(".board");
+    const el=document.createElement("div");
+    el.className="combo";
+    el.textContent=`Combo ×${n}  +${gain}`;
+    board.appendChild(el);
+    setTimeout(()=>el.remove(),800);
+  },
+  dropCells(){
+    const n = state.cur.grid;
+    for(let c=0;c<n;c++){
+      let seg=[];
+      for(let r=0;r<=n;r++){
+        const isIce = r<n && state.ice.has(r+","+c);
+        if(r<n && !isIce){ seg.push(r); continue; }
+        if(seg.length){
+          const foods=[];
+          for(const rr of seg) if(state.board[rr][c]) foods.push(state.board[rr][c]);
+          for(const rr of seg) state.board[rr][c]=null;
+          let k=foods.length-1;
+          for(let i=seg.length-1;i>=0 && k>=0;i--) state.board[seg[i]][c]=foods[k--];
+          seg=[];
+        }
+      }
+    }
+  },
+  refill(){
+    const n = state.cur.grid;
+    for(let r=0;r<n;r++) for(let c=0;c<n;c++){
+      if(!state.ice.has(r+","+c) && !state.board[r][c]){
+        state.board[r][c] = state.pool[Math.floor(Math.random()*state.pool.length)];
+      }
+    }
+  },
+  /* ===== 提示 / 死局 ===== */
+  findHint(){
+    const n = state.cur.grid;
+    const key=(r,c)=>r+","+c;
+    for(let r=0;r<n;r++) for(let c=0;c<n;c++){
+      for(const [dr,dc] of [[0,1],[1,0]]){
+        const r2=r+dr, c2=c+dc;
+        if(r2>=n||c2>=n) continue;
+        if(state.ice.has(key(r,c))||state.ice.has(key(r2,c2))) continue;
+        if(!state.board[r][c]||!state.board[r2][c2]) continue;
+        const t=state.board[r][c]; state.board[r][c]=state.board[r2][c2]; state.board[r2][c2]=t;
+        const ok=this.findMatches().length>0;
+        const t2=state.board[r][c]; state.board[r][c]=state.board[r2][c2]; state.board[r2][c2]=t2;
+        if(ok) return [[r,c],[r2,c2]];
+      }
+    }
+    return null;
+  },
+  resetHint(){
+    clearTimeout(this._hintT);
+    document.querySelectorAll(".cell.hint").forEach(e=>e.classList.remove("hint"));
+    this._hintT=setTimeout(()=>this.showHint(),6000);
+  },
+  showHint(){
+    if(state.busy || state.moves<=0) return;
+    const p=this.findHint();
+    if(p){
+      this.cellAt(p[0][0],p[0][1])?.classList.add("hint");
+      this.cellAt(p[1][0],p[1][1])?.classList.add("hint");
+    }
+  },
+  shuffleBoard(){
+    const n=state.cur.grid;
+    const vals=[];
+    for(let r=0;r<n;r++) for(let c=0;c<n;c++){
+      if(!state.ice.has(r+","+c) && state.board[r][c]) vals.push(state.board[r][c]);
+    }
+    for(let attempt=0; attempt<80; attempt++){
+      for(let i=vals.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=vals[i]; vals[i]=vals[j]; vals[j]=t; }
+      let k=0;
+      for(let r=0;r<n;r++) for(let c=0;c<n;c++){
+        if(!state.ice.has(r+","+c)) state.board[r][c] = k<vals.length ? vals[k++] : null;
+      }
+      if(this.findMatches().length===0 && this.findHint()) break;
+    }
+    this.draw();
+    this.refreshHUD();
+  },
+  checkEnd(){
+    const cleared = state.score>=state.cur.target && state.ice.size===0;
+    if(cleared){ this.win(); return; }
+    if(state.moves<=0){ this.lose(); return; }
+    if(!this.findHint()){ toast("无可消步骤，自动重排 🔄"); this.shuffleBoard(); this.resetHint(); }
+  },
+  /* ===== 奖励：惊喜盒掉率（可变比率）===== */
+  rollBoxDrop(){
+    const daily = state.meta.lastDate !== today();
+    return Math.random() < (daily ? BOX_DROP_DAILY : BOX_DROP_NORMAL);
+  },
+  win(){
+    const lv = state.cur;
+    state.completed.add(lv.num);
+    const stars = state.moves>=6?3:(state.moves>=3?2:1);
+    state.stars[lv.num] = Math.max(state.stars[lv.num]||0, stars);
+    if(lv.num===state.unlocked && lv.num<LEVELS.length) state.unlocked = lv.num+1;
+    // 连胜（损失厌恶）
+    state.meta.streak += 1;
+    state.meta.bestStreak = Math.max(state.meta.bestStreak, state.meta.streak);
+    const streakBonus = STREAK_BONUS[state.meta.streak] || 0;
+    // 惊喜盒：章节关保底 + 概率掉落 + 连胜奖励
+    let boxes = 0;
+    if(lv.chest) boxes += (lv.boss?3:2);
+    if(this.rollBoxDrop()) boxes += 1;
+    boxes += streakBonus;
+    state.meta.lastDate = today();
+    saveSave();
+    const coupon = generateCoupon(lv);
+    const starStr = "⭐".repeat(stars)+"☆".repeat(3-stars);
+    const boxHtml = boxes>0
+      ? `<p>🎁 <b>麦乐惊喜盒 ×${boxes}</b> 已掉落！</p>`
+      : `<p style="font-size:12px;opacity:.7;">🎁 惊喜盒未掉落（掉率45%）· 再通一关试试</p>`;
+    showModal(`
+      <h2>🎉 通关成功！</h2>
+      <div class="stars">${starStr}</div>
+      <p>你已通过 <b>${lv.name}</b>（LV.${lv.num}）· 剩余步数 <b>${state.moves}</b></p>
+      <div>
+        <span class="streak">🔥 连胜 ${state.meta.streak}</span>
+        <span class="streak">🏅 最高 ${state.meta.bestStreak}</span>
+      </div>
+      ${streakBonus?`<p style="color:var(--red);font-weight:800;">🔥 ${state.meta.streak} 连胜奖励：惊喜盒 +${streakBonus}！</p>`:""}
+      ${lv.chest?`<p style="font-weight:800;color:var(--red);">${lv.boss?"👑 终极宝箱":"📦 章节宝箱"} 已解锁（保底 ${lv.boss?3:2} 盒）</p>`:""}
+      <p>本关固定奖励：<b>${lv.reward.title}</b></p>
+      <div class="coupon">
+        ${coupon}
+        <span class="small">${lv.reward.cond||""}</span>
+      </div>
+      ${boxHtml}
+      <div class="actions">
+        ${boxes>0?`<button class="cta" id="boxBtn" onclick="Game.revealBox(${boxes})">🔓 开启惊喜盒</button>`:""}
+        ${lv.num<LEVELS.length?`<button class="cta ghost" onclick="Game.continueGame()">下一关 →</button>`:""}
+        <button class="cta ghost" onclick="Game.exit();closeModal();">返回菜单</button>
+      </div>
+      <p class="odds-note">惊喜盒为随机奖励，概率公示：普通50% / 精良25% / 史诗15% / 传说7% / 限定3%</p>
+    `);
+    toast(boxes>0?"🎁 惊喜盒已掉落":"🎁 优惠券已发放");
+  },
+  revealBox(count){
+    const btn = document.getElementById("boxBtn");
+    if(btn){ btn.disabled=true; btn.textContent="开启中…"; }
+    // 注入开奖区
+    const modalEl = document.getElementById("modal");
+    if(modalEl && !document.getElementById("slot")){
+      const stage = document.createElement("div");
+      stage.innerHTML = `<div class="slot" id="slot">🎁</div><div id="boxReveal"></div>`;
+      const odds = modalEl.querySelector(".odds-note");
+      modalEl.insertBefore(stage, odds);
+    }
+    const slot = document.getElementById("slot");
+    const emojis = ["🎁","🍔","🍟","⭐","🎉","🧊","🥤","👑"];
+    let ticks=0;
+    const iv = setInterval(()=>{ if(slot) slot.textContent = emojis[ticks++ % emojis.length]; }, 70);
+    setTimeout(()=>{
+      clearInterval(iv);
+      const rewards=[];
+      for(let i=0;i<count;i++) rewards.push(rollFromPool(BOX_POOL));
+      if(slot) slot.textContent="🎉";
+      const reveal = document.getElementById("boxReveal");
+      if(reveal){
+        reveal.innerHTML = rewards.map(r=>`
+          <div class="coupon tier-${r.tierKey}">
+            ${r.title}
+            <span class="small">${r.tier} · ${r.cond||""}</span>
+          </div>`).join("");
+      }
+      const again = document.getElementById("boxBtn");
+      if(again){
+        again.disabled=false;
+        again.textContent="收下奖励 ✓";
+        again.onclick = ()=>{ closeModal(); Game.exit(); };
+      }
+    }, 900);
+  },
+  lose(){
+    const lv = state.cur;
+    const scoreLack = state.score < lv.target;
+    const iceLack = iceLayersLeft();
+    const reason = scoreLack
+      ? `目标 ${lv.target} 分未达成，<b>还差 ${lv.target-state.score} 分</b>！`
+      : `分数已达标，但还有 <b>${iceLack}</b> 层冰块未击碎！`;
+    // 近失效应：接近目标时提供续命（每日1次）
+    const canRevive = !scoreLack ? false : (state.score >= lv.target*REVIVE_MIN_PCT) && state.meta.reviveUsedDate !== today();
+    state.meta.streak = 0; // 断连胜
+    saveSave();
+    showModal(`
+      <h2>差一点啦～</h2>
+      <div><span class="streak">🔥 连胜已中断</span></div>
+      <p>${reason}</p>
+      <p style="font-size:12px;opacity:.75;">小提示：优先击碎 🧊 周边的食物；连续消除触发 Combo 倍率；剩余步数越多星级越高。</p>
+      <div class="actions">
+        ${canRevive?`<button class="cta" onclick="Game.revive()">💗 续命券 +3 步（今日1次）</button>`:""}
+        <button class="cta ghost" onclick="Game.retry()">再来一次</button>
+        <button class="cta ghost" onclick="Game.exit();closeModal();">返回菜单</button>
+      </div>
+    `);
+  },
+  revive(){
+    state.meta.reviveUsedDate = today();
+    saveSave();
+    state.moves += 3;
+    closeModal();
+    this.refreshHUD();
+    toast("💗 续命成功 +3 步，加油！");
+    this.resetHint();
+  },
+  retry(){ closeModal(); this.start(state.cur.num); },
+  continueGame(){ closeModal(); this.start(state.cur.num+1); },
+  copy(code){
+    navigator.clipboard?.writeText(code).then(()=>toast("券码已复制"),()=>toast("复制失败，请手动复制"));
+  }
+};
+
+/* ===== 券码生成（演示占位；生产版替换为 mcd-mcp auto-bind-coupons）===== */
+function generateCoupon(lv){
+  const ts = Date.now().toString(36).toUpperCase();
+  const rnd = Math.random().toString(36).slice(2,6).toUpperCase();
+  return `${lv.reward.code.replace("XXXX", ts+rnd)}`;
+}
+
+window.addEventListener("DOMContentLoaded", ()=> Game.init());
+</script>
+</body>
+</html>
